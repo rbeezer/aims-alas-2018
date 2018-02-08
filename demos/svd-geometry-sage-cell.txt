@@ -1,0 +1,37 @@
+ @interact
+ def _(A=matrix(RDF,2,2,[3,2,-4,3]), angle=slider(0,2*pi,default=3*pi/4)):
+     opts = {'figsize': 3}
+     vnorm = vector(RDF, [cos(angle), sin(angle)])
+     e1,e2=identity_matrix(2).columns()
+     U,S,V = A.SVD()
+     v1,v2 = V.columns()
+     s1,s2 = list(S.diagonal())
+     u1,u2 = U.columns()
+     p1=circle((0,0),1,**opts)
+     p1+=plot(vnorm,color='green')
+     p1+=plot(v1,color='red')+plot(v2,color='blue')
+
+     p2 = circle((0,0),1, **opts)
+     p2+=plot(V.H*vnorm,color='green')
+     p2+=plot(V.H*v1,color='red')
+     p2+=plot(V.H*v2,color='blue')
+
+     p3 = ellipse((0,0), s1,s2, **opts)
+     p3 += plot(S*V.H*v1, color='red')
+     p3 += plot(S*V.H*v2, color='blue')
+     p3+= plot(S*V.H*vnorm, color='green')
+
+     # we multiply by the sign of the y-coordinate
+     # because arccos has a range of 0 to pi
+     # we need to handle rotations that go from 0 to 2pi
+     rotation = arccos(u1*vector([1,0])/u1.norm())*sign(u1[1])
+     
+     p4=ellipse((0,0), s1,s2,angle=rotation, **opts)
+     p4 += plot(U*S*V.H*v1, color='red')
+     p4 += plot(U*S*V.H*v2, color='blue')
+     p4+= plot(U*S*V.H*vnorm, color='green')
+     pretty_print(html("$A=U\Sigma V^*$"))
+     pretty_print(html("$%s = %s %s %s$"%(tuple(map(latex, [A,U,S,V.H])))))
+
+     pretty_print(html('$U\Sigma V^* x$, $\Sigma V^* x$, $V^*x$, $x$'))
+     [show(p4), show(p3), show(p2), show(p1)]
